@@ -35,16 +35,17 @@ let requestInterval = argv.t * 1000 // convert seconds to ms
 
 const sections = ['Nodes', 'Workers', 'Slicers', 'Jobs', 'Execution Contexts']
 
-setInterval(function () {
+function renderSections() {
+  console.clear();
   Promise.map(sections, function (section) {
-        // request info from all API endpoints
+    // request info from all API endpoints
     return request({
       uri: ts.api[section].url,
       resolveWithFullResponse: true, // we want the full response, not just body
       simple: false // promise not rejected in case of 404, handle 404s manually
     })
   }).then(function (responses) {
-        // populate the ts.api[section].value fields
+    // populate the ts.api[section].value fields
     for (let i = 0; i < responses.length; i++) {
       handleResponse(sections[i], responses[i])
     }
@@ -52,8 +53,14 @@ setInterval(function () {
     draw(ts)
   }).catch(function (e) {
     console.error(`Error: ${e}`)
+  }).finally(() => {
+    return Promise.delay(requestInterval).then(() => {
+      return renderSections();
+    })
   })
-}, requestInterval) // draw screen at interval
+}
+
+renderSections();
 
 /**
  * This function processes responses from the API request and sets values in ts
