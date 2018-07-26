@@ -1,4 +1,5 @@
 'use strict'
+const { describe, it, expect } = global
 
 const Teraslice = require('../lib/teraslice')
 

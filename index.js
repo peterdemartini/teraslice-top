@@ -8,36 +8,35 @@ const request = require('request-promise')
 const draw = require('./lib/draw')
 
 const argv = require('yargs')
-    .usage(`Usage: $0 [options] [host]`)
-    .example(`$0 -p 45678 10.0.0.12`)
-    .options({
-      'p': {
-        alias: `port`,
-        nargs: 1,
-        number: true,
-        describe: `Port of Teraslice master node`,
-        default: 5678
-      },
-      't': {
-        alias: `timeout`,
-        nargs: 1,
-        number: true,
-        describe: `Time between refresh (seconds)`,
-        default: 2
-      }
-    })
-    .help('h')
-    .alias('h', `help`)
-    .argv
+  .usage(`Usage: $0 [options] [host]`)
+  .example(`$0 -p 45678 10.0.0.12`)
+  .options({
+    'p': {
+      alias: `port`,
+      nargs: 1,
+      number: true,
+      describe: `Port of Teraslice master node`,
+      default: 5678
+    },
+    't': {
+      alias: `timeout`,
+      nargs: 1,
+      number: true,
+      describe: `Time between refresh (seconds)`,
+      default: 2
+    }
+  })
+  .help('h')
+  .alias('h', `help`)
+  .argv
 
 let ts = new Teraslice(argv._[0], argv.p) // host, port
 let requestInterval = argv.t * 1000 // convert seconds to ms
 
 const sections = ['Nodes', 'Workers', 'Slicers', 'Jobs', 'Execution Contexts']
 
-function renderSections() {
-  console.clear();
-  Promise.map(sections, function (section) {
+function renderSections () {
+  return Promise.map(sections, function (section) {
     // request info from all API endpoints
     return request({
       uri: ts.api[section].url,
@@ -55,12 +54,12 @@ function renderSections() {
     console.error(`Error: ${e}`)
   }).finally(() => {
     return Promise.delay(requestInterval).then(() => {
-      return renderSections();
+      return renderSections()
     })
   })
 }
 
-renderSections();
+renderSections()
 
 /**
  * This function processes responses from the API request and sets values in ts
